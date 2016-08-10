@@ -56,7 +56,8 @@ func New(log zap.Logger) *codingLove {
 
 	db, err := bolt.Open(s.PostsDB, 0660, nil)
 	if err != nil {
-		log.Fatal("Cannot open bolt db - %v", zap.Error(err))
+		fmt.Printf("Cannot open bolt db - %v", zap.Error(err))
+		os.Exit(0)
 	}
 
 	return &codingLove{
