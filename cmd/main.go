@@ -39,7 +39,7 @@ func main() {
 	b.NewSender(cl)
 
 	// Init SIGHUP event
-	alfred.WatchSIGHUP(b)
+	alfred.WatchKillSignals(b)
 
 	b.Serve()
 }

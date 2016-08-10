@@ -97,9 +97,9 @@ func (b *Butler) Stop() {
 	wg.Wait()
 }
 
-func WatchSIGHUP(b *Butler) {
+func WatchKillSignals(b *Butler) {
 	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, syscall.SIGHUP, os.Interrupt)
+	signal.Notify(sig, syscall.SIGHUP, os.Interrupt, syscall.SIGTERM)
 
 	go func() {
 		<-sig
