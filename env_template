@@ -1,0 +1,7 @@
+export DEBUG=[true|false]
+export SLACK_TOKEN="token"
+
+export CODINGLOVE_CHANNEL=[@user|"#channel"]
+export CODINGLOVE_POSTS_DB=/path/to/bolt/db
+export CODINGLOVE_DURATION=1s
+

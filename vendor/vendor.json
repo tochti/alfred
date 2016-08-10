@@ -21,6 +21,12 @@
 			"revisionTime": "2016-07-30T14:44:16Z"
 		},
 		{
+			"checksumSHA1": "o9Tsh0YtWAiNUitlTXZJZXr1U2Q=",
+			"path": "github.com/kelseyhightower/envconfig",
+			"revision": "91921eb4cf999321cdbeebdba5a03555800d493b",
+			"revisionTime": "2016-04-29T16:42:05Z"
+		},
+		{
 			"checksumSHA1": "CVPwX/CSFprO7H5YCNb6d2cy8gk=",
 			"path": "github.com/nlopes/slack",
 			"revision": "4feee83bb2b31d790977ce727a028c6a542c72c7",
@@ -31,6 +37,22 @@
 			"path": "github.com/tochti/chief",
 			"revision": "cd0c7f25d0499625145e0e42c6c41c6b890586b0",
 			"revisionTime": "2016-04-10T22:21:01Z"
+		},
+		{
+			"checksumSHA1": "Qb0eMcC9P6tYLT4KNLvNNmvhPr4=",
+			"path": "github.com/uber-go/atomic",
+			"revision": "0c9e689d64f004564b79d9a663634756df322902",
+			"revisionTime": "2016-07-18T20:38:59Z"
+		},
+		{
+			"checksumSHA1": "gkF5mzn7yasbbsg3FD/tEogv3Bk=",
+			"path": "github.com/uber-go/zap",
+			"revision": "d11d2851fcabcf03421c4dbdbc3146fc74eb1035",
+			"revisionTime": "2016-08-09T18:22:53Z"
+		},
+		{
+			"path": "github.com/uber/zap",
+			"revision": ""
 		},
 		{
 			"checksumSHA1": "vqc3a+oTUGX8PmD0TS+qQ7gmN8I=",

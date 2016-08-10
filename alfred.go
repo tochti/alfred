@@ -1,14 +1,17 @@
 package alfred
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 	"time"
 
+	"github.com/kelseyhightower/envconfig"
 	"github.com/nlopes/slack"
 	"github.com/tochti/chief"
+	"github.com/uber-go/zap"
 )
 
 type (
@@ -32,10 +35,16 @@ type (
 		Err       error
 	}
 
+	Specs struct {
+		SlackToken string `required:"true" envconfig:"SLACK_TOKEN"`
+		Debug      bool   `envconfig:"DEBUG"`
+	}
+
 	Butler struct {
 		senders []Sender
 		API     *slack.Client
 		WG      sync.WaitGroup
+		Log     zap.Logger
 	}
 )
 
@@ -101,4 +110,15 @@ func WatchSIGHUP(b *Butler) {
 
 		b.Stop()
 	}()
+}
+
+func ReadSpecs() Specs {
+	s := Specs{}
+	err := envconfig.Process("", &s)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(0)
+	}
+
+	return s
 }

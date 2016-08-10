@@ -2,16 +2,20 @@ package codinglove
 
 import (
 	"aap/alfred"
-	"log"
+	"fmt"
+	"os"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/boltdb/bolt"
+	"github.com/kelseyhightower/envconfig"
 	"github.com/nlopes/slack"
 	"github.com/tochti/chief"
+	"github.com/uber-go/zap"
 )
 
 const (
+	Name        = "codinglove"
 	PostsBucket = "posts"
 )
 
@@ -24,23 +28,42 @@ type (
 		db        *bolt.DB
 		url       string
 		channelID string
-		log       *log.Logger
+		log       zap.Logger
+	}
+
+	specs struct {
+		PostsDB  string        `requried:"true" envconfig:"POSTS_DB"`
+		Channel  string        `required:"true" envconfig:"CHANNEL"`
+		Duration time.Duration `required:"true" envconfig:"DURATION"`
 	}
 )
 
-func New(log *log.Logger, d time.Duration, index string, channelID string) *codingLove {
-	log.SetPrefix("codinglove: ")
-
-	db, err := bolt.Open(index, 0660, nil)
+func readSpecs() specs {
+	s := specs{}
+	err := envconfig.Process(Name, &s)
 	if err != nil {
-		log.Fatalf("Cannot open bolt db - %v", err)
+		fmt.Printf("%v: Cannot read config - %v", Name, err)
+		os.Exit(0)
+	}
+
+	return s
+}
+
+func New(log zap.Logger) *codingLove {
+	log = log.With(zap.String("module", Name))
+
+	s := readSpecs()
+
+	db, err := bolt.Open(s.PostsDB, 0660, nil)
+	if err != nil {
+		log.Fatal("Cannot open bolt db - %v", zap.Error(err))
 	}
 
 	return &codingLove{
-		ticker:    time.NewTicker(d),
+		ticker:    time.NewTicker(s.Duration),
 		db:        db,
 		url:       "http://thecodinglove.com/",
-		channelID: channelID,
+		channelID: s.Channel,
 		log:       log,
 	}
 }
@@ -49,6 +72,7 @@ func (s *codingLove) Start(jC chan chief.Job) {
 	s.stopC = make(chan struct{})
 	s.jobC = jC
 
+	s.log.Debug("Start codinglove watcher")
 	s.watch()
 }
 
@@ -56,7 +80,7 @@ func (s *codingLove) watch() {
 	for {
 		select {
 		case <-s.ticker.C:
-			go s.readNewPosts()
+			s.readNewPosts()
 		case <-s.stopC:
 			return
 		}
@@ -64,10 +88,14 @@ func (s *codingLove) watch() {
 }
 
 func (s *codingLove) readNewPosts() {
-	s.log.Println("Check for new posts")
+	s.log.Debug("Check for new posts")
 	doc, err := goquery.NewDocument(s.url)
 	if err != nil {
-		s.log.Printf("Error cannot read %s: %v\n", s.url, err)
+		s.log.Error(
+			"Error cannot read codinglove website",
+			zap.String("url", s.url),
+			zap.Error(err),
+		)
 		return
 	}
 
@@ -75,21 +103,21 @@ func (s *codingLove) readNewPosts() {
 	titles := doc.Find(".post h3 a")
 
 	if len(titles.Nodes) != len(imgs.Nodes) {
-		s.log.Printf("Found images are unequal to found titles")
+		s.log.Error("Found images are unequal to found titles")
 		return
 	}
 
 	for i := range imgs.Nodes {
-		s.log.Printf("Scan images")
+		s.log.Debug("Scan found images")
 		sel := imgs.Eq(i)
 		key, ok := sel.Attr("src")
 		if !ok {
-			s.log.Printf("Cannot find src attr in node %v", sel)
+			s.log.Debug("Cannot find attribute 'src' in node")
 			continue
 		}
 
 		if s.isInDB(key) {
-			s.log.Printf("%v is already in db", key)
+			s.log.Debug("Gif is already in db", zap.String("gif", key))
 			continue
 		}
 
@@ -112,14 +140,23 @@ func (s *codingLove) readNewPosts() {
 
 		resp := <-msg.Response
 		if resp.Err != nil {
-			s.log.Printf("Error while posting message on channel %v - %v", resp.ChannelID, resp.Err)
+			s.log.Error(
+				"Error while posting message",
+				zap.String("channel_id", resp.ChannelID),
+				zap.Error(resp.Err),
+			)
 			return
 		}
 
 		// everything was successfull save gif in db
 		s.putPost(key, title)
 
-		s.log.Printf("Send %v %v to channel %v", title, key, resp.ChannelID)
+		s.log.Debug(
+			"Send message successfully",
+			zap.String("title", title),
+			zap.String("gif", key),
+			zap.String("channel_id", resp.ChannelID),
+		)
 	}
 
 }
@@ -146,9 +183,14 @@ func (s *codingLove) putPost(key, title string) {
 	s.db.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists([]byte(PostsBucket))
 		if err != nil {
+			s.log.Error("Cannot find bucket", zap.Error(err))
 			return err
 		}
 		err = b.Put([]byte(key), []byte(title))
+		if err != nil {
+			s.log.Error("Cannot put post to db", zap.Error(err))
+		}
+
 		return err
 	})
 }
@@ -156,5 +198,5 @@ func (s *codingLove) putPost(key, title string) {
 func (s *codingLove) Stop() {
 	s.stopC <- struct{}{}
 	s.ticker.Stop()
-	s.log.Println("Stopped!")
+	s.log.Debug("Stopped!")
 }
