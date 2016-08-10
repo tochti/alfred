@@ -1,0 +1,10 @@
+[Unit]
+Description=alfred the slack bot
+
+[Service]
+Environment=DEBUG=true
+Environment=SLACK_TOKEN=
+Environment=CODINGLOVE_CHANNEL="#codinglove"
+Environment=CODINGLOVE_POSTS_DB=/data/alfred/codinglove_posts.bolt
+Environment=CODINGLOVE_DURATION=25m
+ExecStart=/opt/alfred
