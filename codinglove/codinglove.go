@@ -123,7 +123,9 @@ func (s *codingLove) readNewPosts() {
 
 		title := titles.Eq(i).Text()
 
-		params := slack.PostMessageParameters{}
+		params := slack.PostMessageParameters{
+			AsUser: true,
+		}
 		params.Attachments = []slack.Attachment{
 			slack.Attachment{
 				Title:    title,
@@ -133,6 +135,7 @@ func (s *codingLove) readNewPosts() {
 		msg := alfred.Message{
 			Response:  make(chan alfred.MessageResponse),
 			ChannelID: s.channelID,
+			Text:      "New codinglove post",
 			Params:    params,
 		}
 
