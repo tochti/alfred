@@ -1,13 +1,13 @@
 package main
 
 import (
-	"aap/alfred"
-	"aap/alfred/codinglove"
 	"log"
 	"os"
 	"sync"
 
 	"github.com/nlopes/slack"
+	"github.com/tochti/alfred"
+	"github.com/tochti/alfred/codinglove"
 	"github.com/uber-go/zap"
 )
 

@@ -1,7 +1,6 @@
 package codinglove
 
 import (
-	"aap/alfred"
 	"fmt"
 	"os"
 	"time"
@@ -10,6 +9,7 @@ import (
 	"github.com/boltdb/bolt"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/nlopes/slack"
+	"github.com/tochti/alfred"
 	"github.com/tochti/chief"
 	"github.com/uber-go/zap"
 )
