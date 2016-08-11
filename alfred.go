@@ -114,7 +114,7 @@ func WatchKillSignals(b *Butler) {
 
 func ReadSpecs() Specs {
 	s := Specs{}
-	err := envconfig.Process("", &s)
+	err := envconfig.Process("alfred", &s)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(0)

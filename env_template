@@ -1,5 +1,5 @@
-export DEBUG=[true|false]
-export SLACK_TOKEN="token"
+export ALFRED_DEBUG=[true|false]
+export ALFRED_SLACK_TOKEN="token"
 
 export CODINGLOVE_CHANNEL=[@user|"#channel"]
 export CODINGLOVE_POSTS_DB=/path/to/bolt/db
